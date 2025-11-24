@@ -1,0 +1,38 @@
+{
+    // ============================================================================
+    // ICCR Quick Start Configuration
+    // Minimal config to get started with intelligent semantic routing
+    // ============================================================================
+    // Basic routes (required)
+    "routes": {
+        "default": {
+            "provider": "deepseek",
+            "model": "deepseek-chat"
+        }
+    },
+    // Provider credentials (required)
+    "providers": {
+        "deepseek": {
+            "baseURL": "https://api.deepseek.com/v1",
+            "apiKey": "${DEEPSEEK_API_KEY}"
+        },
+        "ollama": {
+            "baseURL": "http://localhost:11434/v1",
+            "apiKey": "ollama"
+        }
+    },
+    // Enable ICCR semantic routing (optional but recommended)
+    "semanticRouting": {
+        "enabled": true,
+        // Use local Ollama for classification (free, private)
+        "classifier": {
+            "provider": "ollama",
+            "model": "qwen2.5:0.5b"
+        }
+    }
+    // That's it! ICCR will:
+    // - Automatically classify your requests
+    // - Learn which models work best
+    // - Optimize for cost and quality
+    // - No keywords needed!
+}

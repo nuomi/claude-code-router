@@ -1,0 +1,440 @@
+{
+    "$schema": "https://raw.githubusercontent.com/musistudio/claude-code-router/main/schema.json",
+    "version": "1.0",
+    // ============================================================================
+    // ICCR v1.0 Configuration Example
+    // Demonstrates all v1.0 features (no embeddings, vector DB, or ONNX models)
+    // ============================================================================
+    // ============================================================================
+    // CLASSIC CCR CONFIGURATION (Required)
+    // ============================================================================
+    "routes": {
+        // Default route - used when no other route matches
+        "default": {
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "match": [
+                "default"
+            ]
+        },
+        // Code-focused route
+        "code": {
+            "provider": "openrouter",
+            "model": "anthropic/claude-3.5-sonnet",
+            "match": [
+                "code",
+                "代码",
+                "function",
+                "class",
+                "implement"
+            ]
+        },
+        // Reasoning-heavy tasks
+        "think": {
+            "provider": "deepseek",
+            "model": "deepseek-reasoner",
+            "match": [
+                "think",
+                "reason",
+                "analyze",
+                "design",
+                "architecture"
+            ]
+        },
+        // Cost-optimized route
+        "cheap": {
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "match": [
+                "cheap",
+                "fast",
+                "quick"
+            ]
+        },
+        // Premium quality route
+        "premium": {
+            "provider": "openrouter",
+            "model": "anthropic/claude-3.5-sonnet",
+            "match": [
+                "premium",
+                "best",
+                "high-quality"
+            ]
+        },
+        // Local/private route
+        "local": {
+            "provider": "ollama",
+            "model": "qwen2.5-coder:latest",
+            "match": [
+                "local",
+                "private",
+                "offline"
+            ]
+        },
+        // Web search route
+        "search": {
+            "provider": "openrouter",
+            "model": "google/gemini-2.0-flash-exp:free",
+            "match": [
+                "search",
+                "google",
+                "web",
+                "find",
+                "lookup"
+            ]
+        },
+        // Auto route - for unlocking session after /model lock
+        "auto": {
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "match": [
+                "auto",
+                "automatic",
+                "自动",
+                "恢复自动"
+            ]
+        }
+    },
+    // Default model when no route matches and semantic routing is disabled
+    "defaultModel": "default",
+    // ============================================================================
+    // PROVIDER CONFIGURATION (Required)
+    // ============================================================================
+    "providers": {
+        // OpenRouter - Access to multiple models
+        "openrouter": {
+            "baseURL": "https://openrouter.ai/api/v1",
+            "apiKey": "${OPENROUTER_API_KEY}",
+            "headers": {
+                "HTTP-Referer": "https://github.com/musistudio/claude-code-router",
+                "X-Title": "Claude Code Router"
+            }
+        },
+        // DeepSeek - Chinese provider with competitive pricing
+        "deepseek": {
+            "baseURL": "https://api.deepseek.com/v1",
+            "apiKey": "${DEEPSEEK_API_KEY}"
+        },
+        // Ollama - Local models
+        "ollama": {
+            "baseURL": "http://localhost:11434/v1",
+            "apiKey": "ollama"
+        }
+    },
+    // ============================================================================
+    // ICCR v1.0 SEMANTIC ROUTING (Optional - New Feature)
+    // ============================================================================
+    "semanticRouting": {
+        // Enable intelligent semantic routing
+        "enabled": true,
+        // Minimum confidence to use semantic routing (0.0-1.0)
+        // If confidence is below this, falls back to rule-based routing
+        "confidenceThreshold": 0.7,
+        // Whether to fallback to rule-based routing on low confidence
+        "fallbackToRules": true,
+        // -------------------------------------------------------------------------
+        // LLM Classifier Configuration
+        // -------------------------------------------------------------------------
+        "classifier": {
+            // Provider for classification LLM
+            // Options: "ollama" (local, free), "openrouter" (cloud, cheap), "openai" (cloud, expensive)
+            "provider": "ollama",
+            // Model for classification
+            // Ollama: "qwen2.5:0.5b" (fast, small), "qwen2.5:1.5b" (better accuracy)
+            // OpenRouter: "google/gemini-2.0-flash-exp:free" (free tier)
+            // OpenAI: "gpt-4o-mini" (paid)
+            "model": "qwen2.5:0.5b",
+            // Base URL (for Ollama)
+            "baseURL": "http://localhost:11434",
+            // API key (for cloud providers)
+            // "apiKey": "${OPENROUTER_API_KEY}",
+            // Temperature for classification (0.0-1.0)
+            // Lower = more deterministic
+            "temperature": 0.1,
+            // Max tokens for classification response
+            "maxTokens": 150,
+            // Cache classification results (reduces repeated LLM calls)
+            "enableCache": true,
+            // Cache TTL in seconds
+            "cacheTTL": 3600
+        },
+        // -------------------------------------------------------------------------
+        // Optimization Goals
+        // -------------------------------------------------------------------------
+        "optimization": {
+            // Weights for multi-objective optimization (must sum to 1.0)
+            "costWeight": 0.3, // How much to prioritize cost
+            "qualityWeight": 0.5, // How much to prioritize quality
+            "latencyWeight": 0.2, // How much to prioritize speed
+            // Constraints
+            "maxCostPerRequest": 0.10, // Maximum cost in USD
+            "maxLatencyMs": 10000, // Maximum latency in ms
+            "minQualityScore": 0.7 // Minimum quality (0.0-1.0)
+        },
+        // -------------------------------------------------------------------------
+        // Learning Configuration
+        // -------------------------------------------------------------------------
+        "learning": {
+            // Enable learning from outcomes
+            "enabled": true,
+            // Learning rate for exponential moving average (0.0-1.0)
+            // Higher = faster adaptation to new data
+            "learningRate": 0.1,
+            // Minimum samples before trusting learned data
+            "minSamples": 5,
+            // Success rate threshold for adding to strengths
+            "strengthThreshold": 0.85,
+            // Success rate threshold for adding to weaknesses
+            "weaknessThreshold": 0.50,
+            // Auto-discover new model capabilities
+            "autoDiscovery": true
+        },
+        // -------------------------------------------------------------------------
+        // Feedback Collection
+        // -------------------------------------------------------------------------
+        "feedback": {
+            // Enable feedback collection
+            "enabled": true,
+            // Collect implicit feedback (retries, errors, etc.)
+            "collectImplicit": true,
+            // Store feedback in database
+            "persistFeedback": true
+        }
+    },
+    // ============================================================================
+    // MODEL CAPABILITIES (Optional - Manual Override)
+    // ============================================================================
+    "modelCapabilities": {
+        // DeepSeek Chat - General purpose, cost-effective
+        "deepseek,deepseek-chat": {
+            "strengths": [
+                "code_generation",
+                "debugging",
+                "refactoring"
+            ],
+            "weaknesses": [
+                "creative_writing",
+                "complex_reasoning"
+            ],
+            "cost_per_1m_tokens": 0.14,
+            "quality_score": 0.85,
+            "avg_latency_ms": 1200,
+            "max_context": 64000,
+            "supports_tools": true,
+            "supports_reasoning": false,
+            "supports_vision": false,
+            "notes": "Excellent for code tasks, very cost-effective"
+        },
+        // DeepSeek Reasoner - Advanced reasoning
+        "deepseek,deepseek-reasoner": {
+            "strengths": [
+                "architecture",
+                "complex_reasoning",
+                "planning",
+                "algorithm_design"
+            ],
+            "weaknesses": [
+                "simple_tasks",
+                "speed"
+            ],
+            "cost_per_1m_tokens": 0.55,
+            "quality_score": 0.92,
+            "avg_latency_ms": 3500,
+            "max_context": 64000,
+            "supports_tools": true,
+            "supports_reasoning": true,
+            "supports_vision": false,
+            "notes": "Best for complex architecture and reasoning tasks"
+        },
+        // Claude 3.5 Sonnet - High quality, balanced
+        "openrouter,anthropic/claude-3.5-sonnet": {
+            "strengths": [
+                "code_generation",
+                "explanation",
+                "refactoring",
+                "general"
+            ],
+            "weaknesses": [
+                "cost"
+            ],
+            "cost_per_1m_tokens": 3.0,
+            "quality_score": 0.95,
+            "avg_latency_ms": 2000,
+            "max_context": 200000,
+            "supports_tools": true,
+            "supports_reasoning": false,
+            "supports_vision": true,
+            "notes": "Premium quality, excellent for all tasks"
+        },
+        // Gemini 2.0 Flash - Free, fast, multimodal
+        "openrouter,google/gemini-2.0-flash-exp:free": {
+            "strengths": [
+                "search",
+                "general",
+                "multimodal",
+                "long_context"
+            ],
+            "weaknesses": [],
+            "cost_per_1m_tokens": 0.0,
+            "quality_score": 0.88,
+            "avg_latency_ms": 1500,
+            "max_context": 1000000,
+            "supports_tools": true,
+            "supports_reasoning": false,
+            "supports_vision": true,
+            "notes": "Free tier, great for search and long context"
+        },
+        // Qwen 2.5 Coder - Local, private
+        "ollama,qwen2.5-coder:latest": {
+            "strengths": [
+                "code_generation",
+                "privacy",
+                "cost"
+            ],
+            "weaknesses": [
+                "quality",
+                "reasoning"
+            ],
+            "cost_per_1m_tokens": 0.0,
+            "quality_score": 0.75,
+            "avg_latency_ms": 800,
+            "max_context": 32000,
+            "supports_tools": false,
+            "supports_reasoning": false,
+            "supports_vision": false,
+            "notes": "Local model, perfect for privacy-sensitive code"
+        }
+    },
+    // ============================================================================
+    // INTENT ROUTING (Optional - Intent-specific model preferences)
+    // ============================================================================
+    "intentRouting": {
+        // Code generation tasks
+        "code_generation": {
+            "preferredModels": [
+                "anthropic/claude-3.5-sonnet",
+                "deepseek-chat",
+                "qwen2.5-coder:latest"
+            ],
+            "minQuality": 0.85,
+            "maxCost": 0.05
+        },
+        // Debugging tasks
+        "debugging": {
+            "preferredModels": [
+                "deepseek-chat",
+                "anthropic/claude-3.5-sonnet"
+            ],
+            "minQuality": 0.80,
+            "maxCost": 0.03
+        },
+        // Architecture and design
+        "architecture": {
+            "preferredModels": [
+                "deepseek-reasoner",
+                "anthropic/claude-3.5-sonnet"
+            ],
+            "minQuality": 0.90,
+            "maxCost": 0.20
+        },
+        // Explanation and documentation
+        "explanation": {
+            "preferredModels": [
+                "anthropic/claude-3.5-sonnet",
+                "deepseek-chat"
+            ],
+            "minQuality": 0.85,
+            "maxCost": 0.05
+        },
+        // Refactoring
+        "refactoring": {
+            "preferredModels": [
+                "anthropic/claude-3.5-sonnet",
+                "deepseek-chat"
+            ],
+            "minQuality": 0.85,
+            "maxCost": 0.05
+        },
+        // Testing
+        "testing": {
+            "preferredModels": [
+                "deepseek-chat",
+                "anthropic/claude-3.5-sonnet"
+            ],
+            "minQuality": 0.80,
+            "maxCost": 0.03
+        },
+        // Web search
+        "search": {
+            "preferredModels": [
+                "google/gemini-2.0-flash-exp:free"
+            ],
+            "minQuality": 0.75,
+            "maxCost": 0.01
+        },
+        // General queries
+        "general": {
+            "preferredModels": [
+                "deepseek-chat",
+                "google/gemini-2.0-flash-exp:free"
+            ],
+            "minQuality": 0.70,
+            "maxCost": 0.02
+        }
+    },
+    // ============================================================================
+    // ADVANCED FEATURES
+    // ============================================================================
+    // Request/Response transformers
+    "transformers": {
+        "request": [
+            {
+                "name": "add-system-prompt",
+                "enabled": true,
+                "config": {
+                    "systemPrompt": "You are a helpful coding assistant."
+                }
+            }
+        ],
+        "response": [
+            {
+                "name": "format-code-blocks",
+                "enabled": true
+            }
+        ]
+    },
+    // Custom router (JavaScript file)
+    "customRouter": {
+        "enabled": false,
+        "path": "./custom-router.js"
+    },
+    // Logging configuration
+    "logging": {
+        "level": "info",
+        "file": "~/.claude-code-router/logs/iccr.log",
+        "maxSize": "10m",
+        "maxFiles": 5,
+        "logRequests": true,
+        "logResponses": false,
+        "logRoutingDecisions": true
+    },
+    // Telemetry (opt-in, disabled by default)
+    "telemetry": {
+        "enabled": false,
+        "anonymous": true,
+        "endpoint": null
+    },
+    // Performance tuning
+    "performance": {
+        "requestTimeout": 60000,
+        "maxConcurrentRequests": 10,
+        "enableCache": true,
+        "cacheTTL": 3600
+    },
+    // Database configuration
+    "database": {
+        "path": "~/.claude-code-router/iccr.db",
+        "backupEnabled": true,
+        "backupInterval": 86400
+    }
+}
