@@ -1,0 +1,108 @@
+{
+    "profiles": [
+        {
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "strengths": [
+                "code_generation",
+                "debugging",
+                "refactoring"
+            ],
+            "weaknesses": [
+                "creative_writing",
+                "complex_reasoning"
+            ],
+            "quality_score": 0.85,
+            "cost_per_1m_tokens": 0.14,
+            "avg_latency_ms": 1200,
+            "supports_reasoning": false,
+            "success_rates": {},
+            "source": "public_benchmark",
+            "sample_count": 0,
+            "last_updated": 0
+        },
+        {
+            "provider": "deepseek",
+            "model": "deepseek-reasoner",
+            "strengths": [
+                "architecture",
+                "complex_reasoning",
+                "planning",
+                "algorithm_design"
+            ],
+            "weaknesses": [
+                "simple_tasks",
+                "speed"
+            ],
+            "quality_score": 0.92,
+            "cost_per_1m_tokens": 0.55,
+            "avg_latency_ms": 3500,
+            "supports_reasoning": true,
+            "success_rates": {},
+            "source": "public_benchmark",
+            "sample_count": 0,
+            "last_updated": 0
+        },
+        {
+            "provider": "openrouter",
+            "model": "anthropic/claude-3.5-sonnet",
+            "strengths": [
+                "code_generation",
+                "explanation",
+                "refactoring",
+                "general"
+            ],
+            "weaknesses": [
+                "cost"
+            ],
+            "quality_score": 0.95,
+            "cost_per_1m_tokens": 3.0,
+            "avg_latency_ms": 2000,
+            "supports_reasoning": false,
+            "success_rates": {},
+            "source": "public_benchmark",
+            "sample_count": 0,
+            "last_updated": 0
+        },
+        {
+            "provider": "openrouter",
+            "model": "google/gemini-2.0-flash-exp:free",
+            "strengths": [
+                "search",
+                "general",
+                "multimodal",
+                "long_context"
+            ],
+            "weaknesses": [],
+            "quality_score": 0.88,
+            "cost_per_1m_tokens": 0.0,
+            "avg_latency_ms": 1500,
+            "supports_reasoning": false,
+            "success_rates": {},
+            "source": "public_benchmark",
+            "sample_count": 0,
+            "last_updated": 0
+        },
+        {
+            "provider": "ollama",
+            "model": "qwen2.5-coder:latest",
+            "strengths": [
+                "code_generation",
+                "privacy",
+                "cost"
+            ],
+            "weaknesses": [
+                "quality",
+                "reasoning"
+            ],
+            "quality_score": 0.75,
+            "cost_per_1m_tokens": 0.0,
+            "avg_latency_ms": 800,
+            "supports_reasoning": false,
+            "success_rates": {},
+            "source": "public_benchmark",
+            "sample_count": 0,
+            "last_updated": 0
+        }
+    ]
+}
