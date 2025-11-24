@@ -91,6 +91,13 @@ export class SemanticRouter {
     }
 
     /**
+     * Check if LLM classifier is available (alias)
+     */
+    hasLLMClassifier(): boolean {
+        return this.isLLMAvailable();
+    }
+
+    /**
      * Get classifier info
      */
     getInfo(): {
