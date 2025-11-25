@@ -7,9 +7,13 @@ const fs = require('fs');
 console.log('Building Claude Code Router...');
 
 try {
-  // Build the main CLI application
-  console.log('Building CLI application...');
+  // Build the main CCR CLI application
+  console.log('Building CCR CLI application...');
   execSync('esbuild src/cli.ts --bundle --platform=node --outfile=dist/cli.js --external:better-sqlite3', { stdio: 'inherit' });
+
+  // Build the ICCR CLI application
+  console.log('Building ICCR CLI application...');
+  execSync('esbuild src/iccr-cli.ts --bundle --platform=node --outfile=dist/iccr-cli.js --external:better-sqlite3', { stdio: 'inherit' });
 
   // Copy the tiktoken WASM file
   console.log('Copying tiktoken WASM file...');

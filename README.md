@@ -24,6 +24,7 @@
 - **Request/Response Transformation**: Customize requests and responses for different providers using transformers.
 - **Dynamic Model Switching**: Switch models on-the-fly within Claude Code using the `/model` command.
 - **CLI Model Management**: Manage models and providers directly from the terminal with `ccr model`.
+- **ICCR - Intelligent Routing**: Standalone CLI (`iccr`) for automatic model selection, learning, and performance tracking.
 - **GitHub Actions Integration**: Trigger Claude Code tasks in your GitHub workflows.
 - **Plugin System**: Extend functionality with custom transformers.
 
@@ -255,7 +256,54 @@ This command provides an interactive interface to:
 
 The CLI tool validates all inputs and provides helpful prompts to guide you through the configuration process, making it easy to manage complex setups without editing JSON files manually.
 
-### 6. Activate Command (Environment Variables Setup)
+### 6. ICCR - Intelligent Routing Management
+
+ICCR (Intelligent Claude Code Router) is a companion CLI tool for managing intelligent model routing and learning. It provides model profiling, classification testing, and statistics.
+
+```shell
+iccr models list
+```
+
+![ICCR Models](blog/images/iccr-models.png)
+
+**Key Features:**
+
+- **Automatic Learning**: Tracks model performance and learns which models work best for different tasks
+- **Model Profiling**: View detailed statistics for each model including success rates, quality scores, and latency
+- **Classification Testing**: Test how ICCR classifies different types of requests
+- **Separate Database**: Uses `~/.iccr/` directory, completely isolated from CCR data
+
+**Available Commands:**
+
+```shell
+# List all model profiles with learned statistics
+iccr models list
+
+# View detailed profile for a specific model
+iccr models show anthropic/claude-3-5-sonnet-20241022
+
+# Show routing statistics
+iccr models stats
+
+# Test classification on any text
+iccr classify "Create a React login component"
+
+# Export learned profiles for backup
+iccr models export my-profiles.json
+
+# Import profiles from another machine
+iccr models import my-profiles.json
+
+# Reset learning data for a model
+iccr models reset provider/model
+```
+
+For complete documentation, see:
+- [ICCR CLI Reference](docs/iccr_cli_reference.md)
+- [ICCR User Guide](docs/iccr_user_guide.md)
+- [ICCR Implementation Walkthrough](docs/iccr_implementation_walkthrough.md)
+
+### 7. Activate Command (Environment Variables Setup)
 
 The `activate` command allows you to set up environment variables globally in your shell, enabling you to use the `claude` command directly or integrate Claude Code Router with applications built using the Agent SDK.
 
