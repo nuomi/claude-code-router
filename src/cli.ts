@@ -16,6 +16,17 @@ import { PID_FILE, REFERENCE_COUNT_FILE } from "./constants";
 import fs, { existsSync, readFileSync } from "fs";
 import { join } from "path";
 
+import { ICCRRouter } from "./iccr-router";
+import {
+  listModels,
+  showModel,
+  resetModel,
+  exportProfiles,
+  importProfiles,
+  testClassify,
+  showStats
+} from "./cli/iccr-commands";
+
 const command = process.argv[2];
 
 const HELP_TEXT = `
@@ -31,6 +42,11 @@ Commands:
   model         Interactive model selection and configuration
   activate      Output environment variables for shell integration
   ui            Open the web UI in browser
+  
+  ICCR Commands:
+  models        Manage learned model profiles
+  classify      Test semantic classification
+  
   -v, version   Show version information
   -h, help      Show help information
 
@@ -38,6 +54,8 @@ Example:
   ccr start
   ccr code "Write a Hello World"
   ccr model
+  ccr models list
+  ccr classify "Create a React component"
   eval "$(ccr activate)"  # Set environment variables globally
   ccr ui
 `;
@@ -60,6 +78,17 @@ async function waitForService(
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   return false;
+}
+
+async function getICCRRouter() {
+  // Load config to get available models if possible, otherwise use defaults
+  // For CLI tools we can use a minimal config just to access the DB
+  const router = new ICCRRouter({
+    semanticRouting: { enabled: true },
+    availableModels: []
+  });
+  await router.initialize();
+  return router;
 }
 
 async function main() {
@@ -115,10 +144,99 @@ async function main() {
         }
       });
       break;
-    // ADD THIS CASE
     case "model":
       await runModelSelector();
       break;
+
+    // ICCR Commands
+    case "models": {
+      const subcommand = process.argv[3];
+      const router = await getICCRRouter();
+      const db = router.getDatabase();
+      const learner = router.getProfileLearner();
+
+      try {
+        switch (subcommand) {
+          case "list":
+            listModels(db);
+            break;
+          case "stats":
+            showStats(db);
+            break;
+          case "show": {
+            const id = process.argv[4];
+            if (!id || !id.includes('/')) {
+              console.error("Usage: ccr models show <provider>/<model>");
+              break;
+            }
+            const [provider, model] = id.split('/');
+            showModel(db, learner, provider, model);
+            break;
+          }
+          case "reset": {
+            const id = process.argv[4];
+            if (!id || !id.includes('/')) {
+              console.error("Usage: ccr models reset <provider>/<model>");
+              break;
+            }
+            const [provider, model] = id.split('/');
+            resetModel(learner, provider, model);
+            break;
+          }
+          case "export": {
+            const file = process.argv[4] || 'iccr-profiles.json';
+            exportProfiles(db, file);
+            break;
+          }
+          case "import": {
+            const file = process.argv[4];
+            if (!file) {
+              console.error("Usage: ccr models import <file>");
+              break;
+            }
+            importProfiles(db, file);
+            break;
+          }
+          default:
+            console.log(`
+Usage: ccr models <command>
+
+Commands:
+  list                  List all model profiles
+  show <p>/<m>          Show detailed profile
+  reset <p>/<m>         Reset learning data
+  stats                 Show routing statistics
+  export [file]         Export profiles (default: iccr-profiles.json)
+  import <file>         Import profiles
+`);
+        }
+      } finally {
+        router.close();
+      }
+      break;
+    }
+
+    case "classify": {
+      const text = process.argv[3];
+      if (!text) {
+        console.error("Usage: ccr classify <text>");
+        process.exit(1);
+      }
+
+      // For classification we need the real config to use the configured LLM
+      // But for now we'll use the minimal config which defaults to rule-based if no LLM configured
+      const router = await getICCRRouter();
+
+      try {
+        // Access private semanticRouter for testing
+        // @ts-ignore
+        await testClassify(router.semanticRouter, text);
+      } finally {
+        router.close();
+      }
+      break;
+    }
+
     case "activate":
     case "env":
       await activateCommand();

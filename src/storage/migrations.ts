@@ -13,7 +13,25 @@ export class MigrationManager {
 
     constructor(db: Database.Database, migrationsDir?: string) {
         this.db = db;
-        this.migrationsDir = migrationsDir || path.join(__dirname, '../../migrations');
+        this.migrationsDir = migrationsDir || this.resolveMigrationsDir();
+        console.log(`[Migrations] Looking for migrations in: ${this.migrationsDir}`);
+    }
+
+    private resolveMigrationsDir(): string {
+        // Try relative to dist (bundled)
+        const distPath = path.join(__dirname, '../migrations');
+        if (fs.existsSync(distPath)) {
+            return distPath;
+        }
+
+        // Try relative to src/storage (source)
+        const srcPath = path.join(__dirname, '../../migrations');
+        if (fs.existsSync(srcPath)) {
+            return srcPath;
+        }
+
+        // Fallback to default (source path)
+        return srcPath;
     }
 
     /**

@@ -8,7 +8,13 @@ import * as path from 'path';
 import { ModelProfile } from '../semantic/types';
 
 export function loadDefaultProfiles(): ModelProfile[] {
-    const profilesPath = path.join(__dirname, '../../data/default-model-profiles.json');
+    // Try relative to dist (bundled)
+    let profilesPath = path.join(__dirname, '../data/default-model-profiles.json');
+
+    if (!fs.existsSync(profilesPath)) {
+        // Try relative to src/learning (source)
+        profilesPath = path.join(__dirname, '../../data/default-model-profiles.json');
+    }
 
     if (!fs.existsSync(profilesPath)) {
         console.warn('[DefaultProfiles] default-model-profiles.json not found');
